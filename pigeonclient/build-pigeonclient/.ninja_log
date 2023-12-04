@@ -1,9 +1,0 @@
-# ninja log v5
-2	694	1701556778670569877	pigeonclient_autogen/timestamp	8ff054f3953c6a29
-2	694	1701556778670569877	pigeonclient_autogen/mocs_compilation.cpp	8ff054f3953c6a29
-2	694	1701556778670569877	/home/anthesis/pigeon_proto/pigeonclient/build-pigeonclient/pigeonclient_autogen/timestamp	8ff054f3953c6a29
-2	694	1701556778670569877	/home/anthesis/pigeon_proto/pigeonclient/build-pigeonclient/pigeonclient_autogen/mocs_compilation.cpp	8ff054f3953c6a29
-695	4301	1701556782280630648	CMakeFiles/pigeonclient.dir/main.cpp.o	5def79a70978667e
-694	4339	1701556782320631322	CMakeFiles/pigeonclient.dir/pigeonclient_autogen/mocs_compilation.cpp.o	e148d0ea4af2d7df
-695	4556	1701556782535634941	CMakeFiles/pigeonclient.dir/pigeonclient.cpp.o	8e9f6c8fea66ea5d
-4556	4944	1701556782919641406	pigeonclient	d171fcdfd00fd5f0

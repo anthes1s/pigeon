@@ -1,4 +1,4 @@
-#include "pigeonclient.h"
+#include "pigeonclient_login.h"
 
 #include <QApplication>
 

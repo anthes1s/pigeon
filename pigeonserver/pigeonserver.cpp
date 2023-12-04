@@ -1,6 +1,11 @@
 #include "pigeonserver.h"
 #include "./ui_pigeonserver.h"
 
+enum RequestType {
+    USER_CONNECTED,
+    SEND_MESSAGE,
+};
+
 pigeonserver::pigeonserver(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::pigeonserver), m_server(new QTcpServer(this))
 {
@@ -39,10 +44,54 @@ void pigeonserver::newClient() {
     m_userConnections.push_back(client_connection);
     connect(client_connection, &QTcpSocket::readyRead, this, &pigeonserver::readFromClient);
     connect(client_connection, &QTcpSocket::disconnected, this, &QObject::deleteLater);
-
-    ui->teMessageBox->append(client_connection->peerAddress().toString() + " connected!");
 }
 
 void pigeonserver::readFromClient() {
+    QByteArray bytearr = qobject_cast<QTcpSocket*>(sender())->readAll();
+    QDataStream out(&bytearr, QIODevice::ReadOnly);
 
+    RequestType req_t;
+    out >> req_t;
+
+    switch(req_t) {
+    case USER_CONNECTED: {
+        QString username;
+        out >> username;
+        ui->teMessageBox->append(username + " connected!");
+        //send this back to clients
+
+        for(auto client : m_userConnections) {
+        QByteArray bytearr;
+        QDataStream in(&bytearr, QIODevice::WriteOnly);
+        in << username + " connected!";
+        quint16 byteswritten = client->write(bytearr);
+        if(byteswritten < 0) {
+            QMessageBox::critical(this, "Pigeon", client->errorString());
+            return;
+        }
+        client->waitForBytesWritten();
+        }
+
+    } break;
+    case SEND_MESSAGE: {
+        QString username;
+        QString message;
+        out >> username >> message;
+        ui->teMessageBox->append(username + " sent " + message);
+        //send this back to clients
+        for(auto client : m_userConnections) {
+            QByteArray bytearr;
+            QDataStream in(&bytearr, QIODevice::WriteOnly);
+            in << username + " - " + message;
+            quint16 byteswritten = client->write(bytearr);
+            if(byteswritten < 0) {
+                QMessageBox::critical(this, "Pigeon", client->errorString());
+                return;
+            }
+            client->waitForBytesWritten();
+        }
+    } break;
+    default:
+    break;
+    }
 }

@@ -1,9 +1,0 @@
-/home/anthesis/pigeon_proto/pigeonclient/build-pigeonclient/CMakeFiles/pigeonclient.dir
-/home/anthesis/pigeon_proto/pigeonclient/build-pigeonclient/CMakeFiles/edit_cache.dir
-/home/anthesis/pigeon_proto/pigeonclient/build-pigeonclient/CMakeFiles/rebuild_cache.dir
-/home/anthesis/pigeon_proto/pigeonclient/build-pigeonclient/CMakeFiles/list_install_components.dir
-/home/anthesis/pigeon_proto/pigeonclient/build-pigeonclient/CMakeFiles/install.dir
-/home/anthesis/pigeon_proto/pigeonclient/build-pigeonclient/CMakeFiles/install/local.dir
-/home/anthesis/pigeon_proto/pigeonclient/build-pigeonclient/CMakeFiles/install/strip.dir
-/home/anthesis/pigeon_proto/pigeonclient/build-pigeonclient/CMakeFiles/pigeonclient_autogen_timestamp_deps.dir
-/home/anthesis/pigeon_proto/pigeonclient/build-pigeonclient/CMakeFiles/pigeonclient_autogen.dir

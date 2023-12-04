@@ -14,15 +14,16 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Gui Network Widgets)
 
 set(PROJECT_SOURCES
         main.cpp
-        pigeonclient.cpp
-        pigeonclient.h
-        pigeonclient.ui
+        pigeonclient_login.cpp
+        pigeonclient_login.h
+        pigeonclient_login.ui
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(pigeonclient
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
+        pigeonclient_main.h pigeonclient_main.cpp pigeonclient_main.ui
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET pigeonclient APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
