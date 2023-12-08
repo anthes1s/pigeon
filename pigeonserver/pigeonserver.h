@@ -26,6 +26,7 @@ private slots:
 private:
     Ui::pigeonserver *ui;
     QTcpServer* m_server = nullptr;
-    QList<QTcpSocket*> m_userConnections;
+    QList<QTcpSocket*> m_userConnections;   /// <-
+    QStringList m_usersAvailable;           /// <- this should be wrapped into a hashmap<QString name, QTcpSocket connection>;
 };
 #endif // PIGEONSERVER_H

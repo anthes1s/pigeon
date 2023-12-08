@@ -5,8 +5,7 @@ pigeonclient::pigeonclient(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::pigeonclient)
 {
     ui->setupUi(this);
-    this->setFixedSize(this->size());
-
+    this->setFixedSize(this->size());    
     connect(ui->pbSignIn, &QPushButton::clicked, this, &pigeonclient::signIn);
 }
 
