@@ -15,7 +15,7 @@ pigeonclient_main::pigeonclient_main(QWidget *parent)
     this->setFixedSize(this->size());
     ui->teMessageBox->setReadOnly(true);
 
-    m_socket->connectToHost("192.168.1.123", 55030);
+    m_socket->connectToHost("192.168.1.100", 55030);
 
     connect(ui->pbSend, &QPushButton::clicked, this, &pigeonclient_main::sendMessage);
     connect(m_socket, &QTcpSocket::readyRead, this, &pigeonclient_main::readFromServer);
