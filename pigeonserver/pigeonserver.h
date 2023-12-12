@@ -31,7 +31,6 @@ private:
     QTcpServer* m_server = nullptr;
     pigeondatabase database;
 
-    QList<QTcpSocket*> m_userConnections;   /// <-
-    QStringList m_usersAvailable;           /// <- this should be wrapped into a hashmap<QString name, QTcpSocket connection>;
+    QMap<QString, QTcpSocket*> m_clients; //username and according socket;
 };
 #endif // PIGEONSERVER_H

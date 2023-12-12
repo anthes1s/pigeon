@@ -15,7 +15,7 @@ pigeonclient_main::pigeonclient_main(QWidget *parent)
     this->setFixedSize(this->size());
     ui->teMessageBox->setReadOnly(true);
 
-    m_socket->connectToHost("192.168.1.100", 55030);
+    m_socket->connectToHost("192.168.1.140", 55030);
 
     connect(ui->pbSend, &QPushButton::clicked, this, &pigeonclient_main::sendMessage);
     connect(m_socket, &QTcpSocket::readyRead, this, &pigeonclient_main::readFromServer);
@@ -59,6 +59,7 @@ void pigeonclient_main::sendMessage() {
         QMessageBox::critical(this, "Pigeon", m_socket->errorString());
     }
     m_socket->waitForBytesWritten();
+
     ui->leMessage->clear();
 }
 
@@ -76,28 +77,15 @@ void pigeonclient_main::readFromServer() {
     case USER_CONNECTED:
     {
         QString username;
-        QStringList usersAvailable;
-        out >> username >> usersAvailable;
-        qDebug() << usersAvailable;
+        out >> username;
+        ui->teMessageBox->append(username + " connected!");
 
-        ui->lwUsers->clear();
-
-        for(auto& user : usersAvailable) {
-            ui->lwUsers->addItem(user);
-        }
     } break;
     case USER_DISCONNECTED:
     {
         QString username;
-        QStringList usersAvailable;
-        out >> username >> usersAvailable;
-        qDebug() << usersAvailable;
-
-        ui->lwUsers->clear();
-
-        for(auto& user : usersAvailable) {
-            ui->lwUsers->addItem(user);
-        }
+        out >> username;
+        ui->teMessageBox->append(username + " disconnected!");
 
     } break;
     case SEND_MESSAGE:
@@ -112,6 +100,4 @@ void pigeonclient_main::readFromServer() {
     default:
     break;
     }
-
-    // ui->teMessageBox->append(message);
 }

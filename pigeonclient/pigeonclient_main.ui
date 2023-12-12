@@ -19,7 +19,7 @@
      <rect>
       <x>10</x>
       <y>10</y>
-      <width>601</width>
+      <width>781</width>
       <height>551</height>
      </rect>
     </property>
@@ -44,16 +44,6 @@
       <y>570</y>
       <width>691</width>
       <height>23</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QListWidget" name="lwUsers">
-    <property name="geometry">
-     <rect>
-      <x>620</x>
-      <y>10</y>
-      <width>171</width>
-      <height>551</height>
      </rect>
     </property>
    </widget>

@@ -42,38 +42,22 @@ pigeonserver::~pigeonserver()
 
 void pigeonserver::newClient() {
     QTcpSocket* client_connection = m_server->nextPendingConnection();
-    m_userConnections.push_back(client_connection);
+
     connect(client_connection, &QTcpSocket::readyRead, this, &pigeonserver::readFromClient);
 
     connect(client_connection, &QTcpSocket::disconnected, this, [=](){
-        for(int i{0}; i < m_userConnections.size(); ++i) {
-            if(m_userConnections[i] == client_connection) {
-                //now we have found the client thats disconnected and deleting it
-                QString disconnectedUser = m_usersAvailable[i]; // we're saving this clients name to notify other clients that this user has disconnected
-                ui->teMessageBox->append(m_usersAvailable[i] + " disconnected!");
-                m_userConnections.erase(m_userConnections.cbegin() + i);
-                m_usersAvailable.erase(m_usersAvailable.cbegin() + i);
-                //now we send back to available users that certain client has disconnected;
-                for(auto& client : m_userConnections) {
-                    QByteArray bytearr;
-                    QDataStream in(&bytearr, QIODevice::WriteOnly);
-                    in << USER_DISCONNECTED << disconnectedUser << m_usersAvailable;
-
-                    quint16 byteswritten = client->write(bytearr);
-                    if(byteswritten < 0) {
-                        QMessageBox::critical(this, "Pigeon Server", client->errorString());
-                    }
-                    client->waitForBytesWritten();
-                }
-                break;
-            }
-        }
+        ///remove client from m_clients upon disconnection
+        m_clients.removeIf([&, client_connection](const auto& client) {
+            ui->teMessageBox->append(client.key() + " disconnected!");
+            return client.value() == client_connection;
+        });
     });
-    qDebug() << m_userConnections;
 }
 
 void pigeonserver::readFromClient() {
-    QByteArray bytearr = qobject_cast<QTcpSocket*>(sender())->readAll();
+    QTcpSocket* sender_socket = qobject_cast<QTcpSocket*>(sender());
+
+    QByteArray bytearr = sender_socket->readAll();
     QDataStream out(&bytearr, QIODevice::ReadOnly);
 
     RequestType req_t;
@@ -85,14 +69,17 @@ void pigeonserver::readFromClient() {
         QString username;
         out >> username;
         ui->teMessageBox->append(username + " connected!");
-        m_usersAvailable << username;
-        qDebug() << m_usersAvailable;
-        //send this back to clients
 
-        for(auto client : m_userConnections) {
+        m_clients.insert(username, sender_socket);
+        qDebug() << "QMAP" << m_clients;
+
+        //send this back to clients
+        for(auto& client : m_clients) {
         QByteArray bytearr;
         QDataStream in(&bytearr, QIODevice::WriteOnly);
-        in << USER_CONNECTED << username << m_usersAvailable;
+
+        in << USER_CONNECTED << username;
+
         quint16 byteswritten = client->write(bytearr);
         if(byteswritten < 0) {
             QMessageBox::critical(this, "Pigeon", client->errorString());
@@ -107,11 +94,13 @@ void pigeonserver::readFromClient() {
     {
         QString username;
         QString message;
-        out >> username >> message;
-        ui->teMessageBox->append(username + " sent " + message);
-        //send this back to clients
 
-        for(auto client : m_userConnections) {
+        out >> username >> message;
+
+        ui->teMessageBox->append(username + " sent " + message);
+
+        //send this back to clients
+        for(auto& client : m_clients) {
             QByteArray bytearr;
             QDataStream in(&bytearr, QIODevice::WriteOnly);
             in << SEND_MESSAGE << username << message;
