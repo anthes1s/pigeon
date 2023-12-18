@@ -22,6 +22,7 @@ public:
 
 private slots:
     void signIn();
+    void signUp();
 
 private:
     Ui::pigeonclient *ui;

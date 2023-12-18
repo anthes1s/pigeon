@@ -14,10 +14,11 @@ public:
     ~pigeondatabase();
 signals:
 
-private slots:
+public slots:
     void userPrintEveryone();
     bool userExists(const QString& username, const QString& password);
-    void userAdd();
+    bool userExists(const QString& username);
+    void userAdd(const QString& username, const QString& password);
 
 private:
     QSqlDatabase database;

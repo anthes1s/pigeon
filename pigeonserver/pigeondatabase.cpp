@@ -3,10 +3,10 @@
 pigeondatabase::pigeondatabase(QObject *parent)
     : QObject{parent}, database{QSqlDatabase::addDatabase("QPSQL")}
 {
-    database.setHostName("localhost");     // replace with your PostgreSQL server host
-    database.setDatabaseName("test");   // replace with your PostgreSQL database name
-    database.setUserName("anthesis");       // replace with your PostgreSQL username
-    database.setPassword("anthesis");       // replace with your PostgreSQL password
+    database.setHostName("localhost");
+    database.setDatabaseName("pigeondatabase");
+    database.setUserName("postgres");
+    database.setPassword("postgres");
     database.setPort(5432);
 
     if(database.open()) {
@@ -14,7 +14,7 @@ pigeondatabase::pigeondatabase(QObject *parent)
     } else qDebug() << "Database not connected!";
 
     userPrintEveryone();
-    qDebug() << userExists("anthesis", "anthesispass");
+    qDebug() << userExists("root", "root");
 }
 
 pigeondatabase::~pigeondatabase()
@@ -55,6 +55,26 @@ bool pigeondatabase::userExists(const QString& username, const QString& password
     return false;
 }
 
-void pigeondatabase::userAdd() {
+bool pigeondatabase::userExists(const QString& username) {
+    QSqlQuery query;
+    if(query.exec("SELECT username FROM users")) {
+        while(query.next()) {
+            if(query.value(0).toString() == username) {
+                return true; /// user exists
+            }
+        }
+        return false; /// user don't exist
+    } else {
+        qDebug() << "Failed to execute a query";
+    }
+    return false;
+}
 
+void pigeondatabase::userAdd(const QString& username, const QString& password) {
+    QSqlQuery query;
+    if(query.exec("INSERT INTO users (username, password) VALUES ('" + username + "','" + password + "')")) {
+        userPrintEveryone();
+    } else {
+        qDebug() << "Failed to execute a query";
+    }
 }

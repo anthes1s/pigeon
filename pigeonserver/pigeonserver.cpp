@@ -1,11 +1,7 @@
 #include "pigeonserver.h"
 #include "./ui_pigeonserver.h"
 
-enum RequestType {
-    USER_CONNECTED,
-    USER_DISCONNECTED,
-    SEND_MESSAGE,
-};
+#include "requesttype.h"
 
 pigeonserver::pigeonserver(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::pigeonserver), m_server(new QTcpServer(this))
@@ -49,6 +45,7 @@ void pigeonserver::newClient() {
         ///remove client from m_clients upon disconnection
         m_clients.removeIf([&, client_connection](const auto& client) {
             ui->teMessageBox->append(client.key() + " disconnected!");
+            qDebug() << m_clients;
             return client.value() == client_connection;
         });
     });
@@ -111,6 +108,47 @@ void pigeonserver::readFromClient() {
             }
             client->waitForBytesWritten();
         }
+    } break;
+
+    case USER_REGISTRATION:
+    {
+        QString username;
+        QString password;
+
+        out >> username >> password;
+
+        qDebug() << username << password;
+
+        if(database.userExists(username)) {
+
+            ui->teMessageBox->append(username + " failed registration: USER ALREADY EXISTS");
+
+            QByteArray reqarr;
+            QDataStream in(&reqarr, QIODevice::WriteOnly);
+
+            in << USER_REGISTRATION_FAIL;
+
+            quint16 byteswritten = sender_socket->write(reqarr);
+            if(byteswritten < 0) {
+                QMessageBox::critical(this, "Pigeon Server", sender_socket->errorString());
+            }
+            sender_socket->waitForBytesWritten();
+        } else {
+            ui->teMessageBox->append(username + " successfuly finished registration!");
+            database.userAdd(username, password);
+
+            QByteArray reqarr;
+            QDataStream in(&reqarr, QIODevice::WriteOnly);
+
+            in << USER_REGISTRATION_SUCCESS;
+
+            quint16 byteswritten = sender_socket->write(reqarr);
+            if(byteswritten < 0) {
+                QMessageBox::critical(this, "Pigeon Server", sender_socket->errorString());
+            }
+            sender_socket->waitForBytesWritten();
+        }
+
     } break;
 
     default:

@@ -1,11 +1,7 @@
 #include "pigeonclient_main.h"
 #include "ui_pigeonclient_main.h"
+#include "requesttype.h"
 
-enum RequestType {
-    USER_CONNECTED,
-    USER_DISCONNECTED, /// delete user from lwUsers when a client disconnects
-    SEND_MESSAGE,
-};
 
 pigeonclient_main::pigeonclient_main(QWidget *parent)
     : QMainWindow(parent)
@@ -15,7 +11,7 @@ pigeonclient_main::pigeonclient_main(QWidget *parent)
     this->setFixedSize(this->size());
     ui->teMessageBox->setReadOnly(true);
 
-    m_socket->connectToHost("192.168.1.140", 55030);
+    m_socket->connectToHost(HOST_IP, 55030);
 
     connect(ui->pbSend, &QPushButton::clicked, this, &pigeonclient_main::sendMessage);
     connect(m_socket, &QTcpSocket::readyRead, this, &pigeonclient_main::readFromServer);
@@ -96,7 +92,8 @@ void pigeonclient_main::readFromServer() {
         qDebug() << username << message;
         ///message do not display for some reason :(
         ui->teMessageBox->append(username + " - " + message);
-    } break;
+    } break;    
+
     default:
     break;
     }
