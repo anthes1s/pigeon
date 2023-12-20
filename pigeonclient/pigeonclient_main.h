@@ -15,6 +15,7 @@ class pigeonclient_main : public QMainWindow
 
 public:
     explicit pigeonclient_main(QWidget *parent = nullptr);
+    explicit pigeonclient_main(QTcpSocket* socket = nullptr);
     ~pigeonclient_main();
     void setUsername(const QString&);
 

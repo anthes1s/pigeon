@@ -20,7 +20,7 @@ pigeonserver::pigeonserver(QWidget *parent)
         }
     }
 
-    if(!m_server->listen(QHostAddress::Any, 55030)) {
+    if(!m_server->listen(QHostAddress::Any, HOST_PORT)) {
         QMessageBox::critical(this, "Pigeon Server", m_server->errorString());
         close();
     } else {
@@ -42,10 +42,8 @@ void pigeonserver::newClient() {
     connect(client_connection, &QTcpSocket::readyRead, this, &pigeonserver::readFromClient);
 
     connect(client_connection, &QTcpSocket::disconnected, this, [=](){
-        ///remove client from m_clients upon disconnection
-        m_clients.removeIf([&, client_connection](const auto& client) {
-            ui->teMessageBox->append(client.key() + " disconnected!");
-            qDebug() << m_clients;
+        //remove client from m_clients upon disconnection
+        m_clients.removeIf([&, client_connection](const auto& client) {            
             return client.value() == client_connection;
         });
     });
@@ -61,12 +59,56 @@ void pigeonserver::readFromClient() {
     out >> req_t;
 
     switch(req_t) {
+    case USER_LOGIN:
+    {
+        QString username;
+        QString password;
+        out >> username >> password;
+
+        //if user exists in database and is not online
+        if(database.userExists(username, password) && m_clients.find(username) == m_clients.end()) {
+            //send USER_LOGIN_SUCCESS back
+
+            qDebug() << "User" << username << "with password" << password << "exists!";
+
+            QByteArray tmparr;
+            QDataStream in(&tmparr, QIODevice::WriteOnly);
+
+            RequestType req_t;
+
+            in << USER_LOGIN_SUCCESS;
+
+            quint16 byteswritten = sender_socket->write(tmparr);
+            if(byteswritten < 0) {
+                QMessageBox::critical(this, "Pigeon", sender_socket->errorString());
+                return;
+            }
+            sender_socket->waitForBytesWritten();
+
+        } else {
+            //send USER_LOGIN_FAIL back
+            qDebug() << "User" << username << "with password" << password << "don't exists!";
+
+            QByteArray tmparr;
+            QDataStream in(&tmparr, QIODevice::WriteOnly);
+
+            RequestType req_t;
+
+            in << USER_LOGIN_FAIL;
+
+            quint16 byteswritten = sender_socket->write(tmparr);
+            if(byteswritten < 0) {
+                QMessageBox::critical(this, "Pigeon", sender_socket->errorString());
+                return;
+            }
+            sender_socket->waitForBytesWritten();
+        }
+    } break;
     case USER_CONNECTED:
     {
         QString username;
         out >> username;
         ui->teMessageBox->append(username + " connected!");
-
         m_clients.insert(username, sender_socket);
         qDebug() << "QMAP" << m_clients;
 
@@ -95,7 +137,7 @@ void pigeonserver::readFromClient() {
         out >> username >> message;
 
         ui->teMessageBox->append(username + " sent " + message);
-
+        qDebug() << m_clients;
         //send this back to clients
         for(auto& client : m_clients) {
             QByteArray bytearr;
@@ -116,8 +158,6 @@ void pigeonserver::readFromClient() {
         QString password;
 
         out >> username >> password;
-
-        qDebug() << username << password;
 
         if(database.userExists(username)) {
 
@@ -154,4 +194,8 @@ void pigeonserver::readFromClient() {
     default:
     break;
     }
+}
+
+bool pigeonserver::isOnline(const QString& username) {
+    return false;
 }

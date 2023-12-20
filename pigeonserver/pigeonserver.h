@@ -22,9 +22,10 @@ public:
     pigeonserver(QWidget *parent = nullptr);
     ~pigeonserver();
 
-private slots:
+public slots:
     void newClient();
     void readFromClient();
+    bool isOnline(const QString& username);
 
 private:
     Ui::pigeonserver *ui;

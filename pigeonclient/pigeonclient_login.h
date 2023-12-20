@@ -23,6 +23,8 @@ public:
 private slots:
     void signIn();
     void signUp();
+    bool loginSuccessful();
+    bool registrationSuccessful();
 
 private:
     Ui::pigeonclient *ui;

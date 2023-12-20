@@ -2,17 +2,33 @@
 #include "ui_pigeonclient_main.h"
 #include "requesttype.h"
 
-
 pigeonclient_main::pigeonclient_main(QWidget *parent)
     : QMainWindow(parent)
-    , ui(new Ui::pigeonclient_main), m_socket(new QTcpSocket(this))
+    , ui(new Ui::pigeonclient_main)
 {
     ui->setupUi(this);
     this->setFixedSize(this->size());
     ui->teMessageBox->setReadOnly(true);
 
-    m_socket->connectToHost(HOST_IP, 55030);
+    m_socket->connectToHost(HOST_IP, HOST_PORT);
 
+    disconnect(m_socket);
+    connect(ui->pbSend, &QPushButton::clicked, this, &pigeonclient_main::sendMessage);
+    connect(m_socket, &QTcpSocket::readyRead, this, &pigeonclient_main::readFromServer);
+    connect(m_socket, &QTcpSocket::disconnected, this, &QObject::deleteLater); /// when disconnected send&get a request from a server to delete a client
+    qDebug() << m_socket;
+}
+
+pigeonclient_main::pigeonclient_main(QTcpSocket* socket)
+    : ui(new Ui::pigeonclient_main), m_socket(qMove(socket))
+{
+    ui->setupUi(this);
+    this->setFixedSize(this->size());
+    ui->teMessageBox->setReadOnly(true);
+
+    m_socket->connectToHost(HOST_IP, HOST_PORT);
+
+    disconnect(m_socket);
     connect(ui->pbSend, &QPushButton::clicked, this, &pigeonclient_main::sendMessage);
     connect(m_socket, &QTcpSocket::readyRead, this, &pigeonclient_main::readFromServer);
     connect(m_socket, &QTcpSocket::disconnected, this, &QObject::deleteLater); /// when disconnected send&get a request from a server to delete a client
