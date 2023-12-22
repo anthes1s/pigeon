@@ -19,6 +19,9 @@ public slots:
     bool userExists(const QString& username, const QString& password);
     bool userExists(const QString& username);
     void userAdd(const QString& username, const QString& password);
+    QStringList messageGetHistory(const QString& table);
+    void messageAdd(const QString& username, const QString& message);
+    void createChatroom(const QString& chatroomName);
 
 private:
     QSqlDatabase database;

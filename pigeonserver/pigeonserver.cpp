@@ -117,7 +117,9 @@ void pigeonserver::readFromClient() {
         QByteArray bytearr;
         QDataStream in(&bytearr, QIODevice::WriteOnly);
 
-        in << USER_CONNECTED << username;
+        in << USER_CONNECTED << username << database.messageGetHistory("global");
+
+        qDebug() << "USER CONNECTED" << database.messageGetHistory("global");
 
         quint16 byteswritten = client->write(bytearr);
         if(byteswritten < 0) {
@@ -137,6 +139,8 @@ void pigeonserver::readFromClient() {
         out >> username >> message;
 
         ui->teMessageBox->append(username + " sent " + message);
+        //also add it to the database
+        database.messageAdd(username, message);
         qDebug() << m_clients;
         //send this back to clients
         for(auto& client : m_clients) {

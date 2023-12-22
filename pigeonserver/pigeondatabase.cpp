@@ -15,6 +15,11 @@ pigeondatabase::pigeondatabase(QObject *parent)
 
     userPrintEveryone();
     qDebug() << userExists("root", "root");
+
+    //create a table (IF NOT EXIST) for a global chatroom message history?
+    createChatroom("global");
+    messageGetHistory("global");
+
 }
 
 pigeondatabase::~pigeondatabase()
@@ -74,6 +79,42 @@ void pigeondatabase::userAdd(const QString& username, const QString& password) {
     QSqlQuery query;
     if(query.exec("INSERT INTO users (username, password) VALUES ('" + username + "','" + password + "')")) {
         userPrintEveryone();
+    } else {
+        qDebug() << "Failed to execute a query";
+    }
+}
+
+QStringList pigeondatabase::messageGetHistory(const QString& table) {
+    QSqlQuery query;
+    QStringList msgHistory;
+    if(query.exec("SELECT * FROM " + table)) {
+        while(query.next()) {
+            msgHistory.push_back(query.value(0).toString() + " - " + query.value(1).toString());
+            qDebug() << "MSGGETHISTORY" << query.value(0).toString() + " - " + query.value(1).toString();
+        }
+    } else {
+        qDebug() << "Failed to execute a query";
+    }
+
+
+    return msgHistory;
+}
+
+void pigeondatabase::createChatroom(const QString& table) {
+    QSqlQuery query;
+    if(query.exec("CREATE TABLE IF NOT EXISTS " + table +
+                   " (username VARCHAR(255) NOT NULL," +
+                   "  message  VARCHAR(512) NOT NULL)")) {
+    } else {
+        qDebug() << "Failed to execute a query";
+    }
+}
+
+void pigeondatabase::messageAdd(const QString& username, const QString& message) {
+    QSqlQuery query;
+    // i'll need to add a chatroomName parameter later
+    if(query.exec("INSERT INTO global (username, message) VALUES ('" + username + "','" + message + "')")) {
+        messageGetHistory("global");
     } else {
         qDebug() << "Failed to execute a query";
     }

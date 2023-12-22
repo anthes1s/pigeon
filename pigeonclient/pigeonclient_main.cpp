@@ -16,6 +16,9 @@ pigeonclient_main::pigeonclient_main(QWidget *parent)
     connect(ui->pbSend, &QPushButton::clicked, this, &pigeonclient_main::sendMessage);
     connect(m_socket, &QTcpSocket::readyRead, this, &pigeonclient_main::readFromServer);
     connect(m_socket, &QTcpSocket::disconnected, this, &QObject::deleteLater); /// when disconnected send&get a request from a server to delete a client
+
+    //get global chat room message history from server
+
     qDebug() << m_socket;
 }
 
@@ -81,16 +84,16 @@ void pigeonclient_main::readFromServer() {
 
     RequestType req_t;
     out >> req_t;
-    ///
-    /// When we connect to the socket we need to ask for a list of people that are already connected to the server and we need to refresh this list
-    /// each time a new user connects/disconnects to the server; DO LOGIN/REGISTRATION FIRST YOU FAGGOT!!!
-    ///
+
     switch(req_t) {
     case USER_CONNECTED:
     {
         QString username;
-        out >> username;
+        QStringList msgHistory;
+        out >> username >> msgHistory;
+        qDebug() << "MSGHISTORY " << msgHistory;
         ui->teMessageBox->append(username + " connected!");
+        for(auto& msg : msgHistory) ui->teMessageBox->append(msg);
 
     } break;
     case USER_DISCONNECTED:
@@ -105,7 +108,6 @@ void pigeonclient_main::readFromServer() {
         QString username;
         QString message;
         out >> username >> message;
-        qDebug() << username << message;
         ///message do not display for some reason :(
         ui->teMessageBox->append(username + " - " + message);
     } break;    
