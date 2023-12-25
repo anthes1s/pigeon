@@ -25,6 +25,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         ${PROJECT_SOURCES}
         pigeondatabase.h pigeondatabase.cpp
         requesttype.h
+        hostconstants.h
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET pigeonserver APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR

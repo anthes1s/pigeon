@@ -1,5 +1,7 @@
 #include "pigeonclient_main.h"
 #include "ui_pigeonclient_main.h"
+
+#include "hostconstants.h"
 #include "requesttype.h"
 
 pigeonclient_main::pigeonclient_main(QWidget *parent)
@@ -10,7 +12,7 @@ pigeonclient_main::pigeonclient_main(QWidget *parent)
     this->setFixedSize(this->size());
     ui->teMessageBox->setReadOnly(true);
 
-    m_socket->connectToHost(HOST_IP, HOST_PORT);
+    m_socket->connectToHost(hostconstants::HOST_IP, hostconstants::HOST_PORT);
 
     disconnect(m_socket);
     connect(ui->pbSend, &QPushButton::clicked, this, &pigeonclient_main::sendMessage);
@@ -29,7 +31,7 @@ pigeonclient_main::pigeonclient_main(QTcpSocket* socket)
     this->setFixedSize(this->size());
     ui->teMessageBox->setReadOnly(true);
 
-    m_socket->connectToHost(HOST_IP, HOST_PORT);
+    m_socket->connectToHost(hostconstants::HOST_IP, hostconstants::HOST_PORT);
 
     disconnect(m_socket);
     connect(ui->pbSend, &QPushButton::clicked, this, &pigeonclient_main::sendMessage);

@@ -1,6 +1,7 @@
 #include "pigeonclient_login.h"
 #include "./ui_pigeonclient_login.h"
 
+#include "hostconstants.h"
 #include "requesttype.h"
 
 pigeonclient::pigeonclient(QWidget *parent)
@@ -28,7 +29,7 @@ void pigeonclient::signIn() {
 
         connect(tmp_socket, &QTcpSocket::readyRead, this, &pigeonclient::loginSuccessful);
 
-        tmp_socket->connectToHost(HOST_IP, HOST_PORT);
+        tmp_socket->connectToHost(hostconstants::HOST_IP, hostconstants::HOST_PORT);
 
         QByteArray bytearr;
         QDataStream in(&bytearr, QIODevice::WriteOnly);
@@ -61,7 +62,7 @@ void pigeonclient::signUp() {
 
     connect(tmp_socket, &QTcpSocket::readyRead, this, &pigeonclient::registrationSuccessful);
 
-    tmp_socket->connectToHost(HOST_IP, HOST_PORT);
+    tmp_socket->connectToHost(hostconstants::HOST_IP, hostconstants::HOST_PORT);
 
     QByteArray bytearr;
     QDataStream datastream(&bytearr, QIODevice::ReadWrite);
@@ -113,6 +114,7 @@ bool pigeonclient::loginSuccessful() {
         qDebug() << "Login failed!";
         sender_socket->disconnectFromHost();
         disconnect(sender_socket, nullptr, nullptr, nullptr);
+        delete sender_socket;
         QMessageBox::critical(this, "Pigeon", "Login failed!");
         return false;
     } break;
@@ -146,6 +148,7 @@ bool pigeonclient::registrationSuccessful() {
         QMessageBox::critical(this, "Pigeon", "User with such login and/or password already exists!");
         sender_socket->disconnectFromHost();
         disconnect(sender_socket, nullptr, nullptr, nullptr);
+        delete sender_socket;
         return false;
     } break;
     case USER_REGISTRATION_SUCCESS:
@@ -153,6 +156,7 @@ bool pigeonclient::registrationSuccessful() {
         QMessageBox::information(this, "Pigeon", "User registered successfully!");
         sender_socket->disconnectFromHost();
         disconnect(sender_socket, nullptr, nullptr, nullptr); // this disconnects EVERY signal/slot relationship
+        delete sender_socket;
         return true;
     } break;
 

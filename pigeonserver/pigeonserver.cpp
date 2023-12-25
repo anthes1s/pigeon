@@ -1,6 +1,7 @@
 #include "pigeonserver.h"
 #include "./ui_pigeonserver.h"
 
+#include "hostconstants.h"
 #include "requesttype.h"
 
 pigeonserver::pigeonserver(QWidget *parent)
@@ -20,7 +21,7 @@ pigeonserver::pigeonserver(QWidget *parent)
         }
     }
 
-    if(!m_server->listen(QHostAddress::Any, HOST_PORT)) {
+    if(!m_server->listen(QHostAddress::Any, hostconstants::HOST_PORT)) {
         QMessageBox::critical(this, "Pigeon Server", m_server->errorString());
         close();
     } else {
