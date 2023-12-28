@@ -15,7 +15,8 @@ public:
 signals:
 
 public slots:
-    void userPrintEveryone();
+    QStringList userPrint(const QString& username);
+    void userPrintEveryone(); //change return type maybe?
     bool userExists(const QString& username, const QString& password);
     bool userExists(const QString& username);
     void userAdd(const QString& username, const QString& password);

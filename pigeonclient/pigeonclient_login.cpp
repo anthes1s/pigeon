@@ -25,7 +25,7 @@ void pigeonclient::signIn() {
     if(!username.isEmpty() || !password.isEmpty()) {
         // send USER_LOGIN with username and password to server to process it
         QTcpSocket* tmp_socket = new QTcpSocket();
-        qDebug() << tmp_socket;
+        qDebug() << "_login socket" << tmp_socket;
 
         connect(tmp_socket, &QTcpSocket::readyRead, this, &pigeonclient::loginSuccessful);
 
@@ -89,19 +89,13 @@ bool pigeonclient::loginSuccessful() {
     RequestType req_t;
     out >> req_t;
 
-    qDebug() << req_t << "ReadyRead _login";
-
     switch(req_t) {
     case USER_LOGIN_SUCCESS:
     {
-        qDebug() << "Login successful!";
-
         sender_socket->disconnectFromHost();
-        disconnect(sender_socket, nullptr, nullptr, nullptr);
+        disconnect(sender_socket, &QTcpSocket::readyRead, nullptr, nullptr);
 
-        qDebug() << "socket" << sender_socket << "should be disconnected";
-
-        m_main = new pigeonclient_main(sender_socket);
+        m_main = new pigeonclient_main(qMove(sender_socket));
         m_main->setUsername(username);
         m_main->sendConnected();
         m_main->show();
@@ -111,21 +105,14 @@ bool pigeonclient::loginSuccessful() {
     } break;
     case USER_LOGIN_FAIL:
     {
-        qDebug() << "Login failed!";
         sender_socket->disconnectFromHost();
-        disconnect(sender_socket, nullptr, nullptr, nullptr);
+        disconnect(sender_socket, &QTcpSocket::readyRead, nullptr, nullptr);
         delete sender_socket;
         QMessageBox::critical(this, "Pigeon", "Login failed!");
         return false;
     } break;
-    //these were added just to avoid a retarded Qt warning T_T
-    case USER_LOGIN:
-    case USER_CONNECTED:
-    case USER_DISCONNECTED:
-    case USER_REGISTRATION:
-    case USER_REGISTRATION_SUCCESS:
-    case USER_REGISTRATION_FAIL:
-    case SEND_MESSAGE:
+
+    default:
         break;
     }
     return false;
@@ -140,14 +127,12 @@ bool pigeonclient::registrationSuccessful() {
     RequestType req_t;
     out >> req_t;
 
-    qDebug() << req_t;
-
     switch(req_t) {
     case USER_REGISTRATION_FAIL:
     {
         QMessageBox::critical(this, "Pigeon", "User with such login and/or password already exists!");
         sender_socket->disconnectFromHost();
-        disconnect(sender_socket, nullptr, nullptr, nullptr);
+        disconnect(sender_socket, &QTcpSocket::readyRead, nullptr, nullptr);
         delete sender_socket;
         return false;
     } break;
@@ -155,20 +140,12 @@ bool pigeonclient::registrationSuccessful() {
     {
         QMessageBox::information(this, "Pigeon", "User registered successfully!");
         sender_socket->disconnectFromHost();
-        disconnect(sender_socket, nullptr, nullptr, nullptr); // this disconnects EVERY signal/slot relationship
+        disconnect(sender_socket, &QTcpSocket::readyRead, nullptr, nullptr);
         delete sender_socket;
         return true;
     } break;
 
-
-        //these were added just to avoid a retarded Qt warning T_T
-    case USER_LOGIN:
-    case USER_LOGIN_SUCCESS:
-    case USER_LOGIN_FAIL:
-    case USER_CONNECTED:
-    case USER_DISCONNECTED:
-    case USER_REGISTRATION:
-    case SEND_MESSAGE:
+    default:
         break;
     }
     return false;

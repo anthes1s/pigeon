@@ -36,6 +36,9 @@
       <height>26</height>
      </rect>
     </property>
+    <property name="echoMode">
+     <enum>QLineEdit::Password</enum>
+    </property>
     <property name="placeholderText">
      <string>Password</string>
     </property>

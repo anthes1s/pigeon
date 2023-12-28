@@ -69,9 +69,6 @@ void pigeonserver::readFromClient() {
         //if user exists in database and is not online
         if(database.userExists(username, password) && m_clients.find(username) == m_clients.end()) {
             //send USER_LOGIN_SUCCESS back
-
-            qDebug() << "User" << username << "with password" << password << "exists!";
-
             QByteArray tmparr;
             QDataStream in(&tmparr, QIODevice::WriteOnly);
 
@@ -88,8 +85,6 @@ void pigeonserver::readFromClient() {
 
         } else {
             //send USER_LOGIN_FAIL back
-            qDebug() << "User" << username << "with password" << password << "don't exists!";
-
             QByteArray tmparr;
             QDataStream in(&tmparr, QIODevice::WriteOnly);
 
@@ -111,16 +106,12 @@ void pigeonserver::readFromClient() {
         out >> username;
         ui->teMessageBox->append(username + " connected!");
         m_clients.insert(username, sender_socket);
-        qDebug() << "QMAP" << m_clients;
-
         //send this back to clients
         for(auto& client : m_clients) {
         QByteArray bytearr;
         QDataStream in(&bytearr, QIODevice::WriteOnly);
 
         in << USER_CONNECTED << username << database.messageGetHistory("global");
-
-        qDebug() << "USER CONNECTED" << database.messageGetHistory("global");
 
         quint16 byteswritten = client->write(bytearr);
         if(byteswritten < 0) {
@@ -142,7 +133,6 @@ void pigeonserver::readFromClient() {
         ui->teMessageBox->append(username + " sent " + message);
         //also add it to the database
         database.messageAdd(username, message);
-        qDebug() << m_clients;
         //send this back to clients
         for(auto& client : m_clients) {
             QByteArray bytearr;
@@ -176,6 +166,7 @@ void pigeonserver::readFromClient() {
             quint16 byteswritten = sender_socket->write(reqarr);
             if(byteswritten < 0) {
                 QMessageBox::critical(this, "Pigeon Server", sender_socket->errorString());
+                return;
             }
             sender_socket->waitForBytesWritten();
         } else {
@@ -190,6 +181,30 @@ void pigeonserver::readFromClient() {
             quint16 byteswritten = sender_socket->write(reqarr);
             if(byteswritten < 0) {
                 QMessageBox::critical(this, "Pigeon Server", sender_socket->errorString());
+                return;
+            }
+            sender_socket->waitForBytesWritten();
+        }
+
+    } break;
+    case USER_SEARCH:
+    {
+        QString search;
+        out >> search;
+        qDebug() << search;
+
+        {
+            QStringList usersFound {database.userPrint(search)};
+
+            QByteArray tmparr;
+            QDataStream in(&tmparr, QIODevice::WriteOnly);
+
+            in << USER_SEARCH << usersFound;
+
+            quint16 byteswritten = sender_socket->write(tmparr);
+            if(byteswritten < 0) {
+                QMessageBox::critical(this, "Pigeon Server", sender_socket->errorString());
+                return;
             }
             sender_socket->waitForBytesWritten();
         }

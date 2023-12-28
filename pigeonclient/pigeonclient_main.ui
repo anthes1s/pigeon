@@ -17,9 +17,9 @@
    <widget class="QTextEdit" name="teMessageBox">
     <property name="geometry">
      <rect>
-      <x>10</x>
+      <x>170</x>
       <y>10</y>
-      <width>781</width>
+      <width>621</width>
       <height>551</height>
      </rect>
     </property>
@@ -44,6 +44,26 @@
       <y>570</y>
       <width>691</width>
       <height>23</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="leSearch">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>10</y>
+      <width>151</width>
+      <height>24</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QListWidget" name="lwSearchResults">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>40</y>
+      <width>151</width>
+      <height>521</height>
      </rect>
     </property>
    </widget>

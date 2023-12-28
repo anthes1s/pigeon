@@ -4,24 +4,8 @@
 #include "hostconstants.h"
 #include "requesttype.h"
 
-pigeonclient_main::pigeonclient_main(QWidget *parent)
-    : QMainWindow(parent)
-    , ui(new Ui::pigeonclient_main)
+pigeonclient_main::pigeonclient_main(QWidget *parent) : QMainWindow(parent), ui(new Ui::pigeonclient_main)
 {
-    ui->setupUi(this);
-    this->setFixedSize(this->size());
-    ui->teMessageBox->setReadOnly(true);
-
-    m_socket->connectToHost(hostconstants::HOST_IP, hostconstants::HOST_PORT);
-
-    disconnect(m_socket);
-    connect(ui->pbSend, &QPushButton::clicked, this, &pigeonclient_main::sendMessage);
-    connect(m_socket, &QTcpSocket::readyRead, this, &pigeonclient_main::readFromServer);
-    connect(m_socket, &QTcpSocket::disconnected, this, &QObject::deleteLater); /// when disconnected send&get a request from a server to delete a client
-
-    //get global chat room message history from server
-
-    qDebug() << m_socket;
 }
 
 pigeonclient_main::pigeonclient_main(QTcpSocket* socket)
@@ -32,12 +16,41 @@ pigeonclient_main::pigeonclient_main(QTcpSocket* socket)
     ui->teMessageBox->setReadOnly(true);
 
     m_socket->connectToHost(hostconstants::HOST_IP, hostconstants::HOST_PORT);
-
-    disconnect(m_socket);
+    disconnect(m_socket, nullptr, nullptr, nullptr);
     connect(ui->pbSend, &QPushButton::clicked, this, &pigeonclient_main::sendMessage);
+    connect(ui->leSearch, &QLineEdit::textChanged, this, [&](){
+
+        //lock search and clear it
+        ui->lwSearchResults->clear();
+        if(ui->leSearch->text().isEmpty()) return;
+
+        ui->leSearch->setReadOnly(true);
+
+
+        QString search {ui->leSearch->text()};
+        //send request to server
+
+        QByteArray bytearr;
+        QDataStream in(&bytearr, QIODevice::WriteOnly);
+
+        in << USER_SEARCH << search;
+
+        qDebug() << search;
+
+        quint16 byteswritten = m_socket->write(bytearr);
+        if(byteswritten < 0) QMessageBox::critical(this, "Pigeon", m_socket->errorString());
+        m_socket->waitForBytesWritten();
+        m_socket->waitForReadyRead();
+        //also probably have to wait for ReadyRead?
+
+        //unlock search
+        ui->leSearch->setReadOnly(false);
+
+    }); //whenever text changing, post results to lwSearchResults
     connect(m_socket, &QTcpSocket::readyRead, this, &pigeonclient_main::readFromServer);
     connect(m_socket, &QTcpSocket::disconnected, this, &QObject::deleteLater); /// when disconnected send&get a request from a server to delete a client
-    qDebug() << m_socket;
+
+    qDebug() << "_main socket" << m_socket;
 }
 
 pigeonclient_main::~pigeonclient_main()
@@ -92,9 +105,7 @@ void pigeonclient_main::readFromServer() {
     {
         QString username;
         QStringList msgHistory;
-        out >> username >> msgHistory;
-        qDebug() << "MSGHISTORY " << msgHistory;
-        ui->teMessageBox->append(username + " connected!");
+        out >> username >> msgHistory;        
         for(auto& msg : msgHistory) ui->teMessageBox->append(msg);
 
     } break;
@@ -109,10 +120,15 @@ void pigeonclient_main::readFromServer() {
     {
         QString username;
         QString message;
-        out >> username >> message;
-        ///message do not display for some reason :(
+        out >> username >> message;       
         ui->teMessageBox->append(username + " - " + message);
-    } break;    
+    } break;
+    case USER_SEARCH:
+    {
+        QStringList usersFound;
+        out >> usersFound;
+        for(auto& user : usersFound) ui->lwSearchResults->addItem(user);
+    } break;
 
     default:
     break;

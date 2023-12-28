@@ -13,13 +13,7 @@ pigeondatabase::pigeondatabase(QObject *parent)
         qDebug() << "Database connected!";
     } else qDebug() << "Database not connected!";
 
-    userPrintEveryone();
-    qDebug() << userExists("root", "root");
-
-    //create a table (IF NOT EXIST) for a global chatroom message history?
     createChatroom("global");
-    messageGetHistory("global");
-
 }
 
 pigeondatabase::~pigeondatabase()
@@ -43,6 +37,20 @@ void pigeondatabase::userPrintEveryone() {
     } else {
         qDebug() << "Failed to execute a query";
     }
+}
+
+QStringList pigeondatabase::userPrint(const QString& username) {
+    QSqlQuery query;
+    QStringList usersFound;
+    if(query.exec("SELECT username FROM users WHERE username LIKE '%" + username + "%'")) {
+        while(query.next()) {
+            usersFound.push_back(query.value(0).toString());
+        }
+    } else {
+        qDebug() << "Failed to execute a query";
+    }
+    qDebug() << usersFound;
+    return usersFound;
 }
 
 bool pigeondatabase::userExists(const QString& username, const QString& password) {
@@ -119,3 +127,5 @@ void pigeondatabase::messageAdd(const QString& username, const QString& message)
         qDebug() << "Failed to execute a query";
     }
 }
+
+

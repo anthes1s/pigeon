@@ -6,10 +6,12 @@ enum RequestType {
     USER_LOGIN_SUCCESS,
     USER_LOGIN_FAIL,
     USER_CONNECTED,
-    USER_DISCONNECTED, /// delete user from lwUsers when a client disconnects
+    USER_DISCONNECTED,
     USER_REGISTRATION,
     USER_REGISTRATION_SUCCESS,
     USER_REGISTRATION_FAIL,
+    USER_SEARCH,
     SEND_MESSAGE,
+    SEND_PRIVATE_MESSAGE,
 };
 #endif // REQUESTTYPE_H
