@@ -13,12 +13,12 @@ pigeondatabase::pigeondatabase(QObject *parent)
         qDebug() << "Database connected!";
     } else qDebug() << "Database not connected!";
 
-    createChatroom("global");
+    userPrintEveryone();
+    messageGetHistory("rootanthesis_msghistory");
 }
 
 pigeondatabase::~pigeondatabase()
 {
-
 }
 
 ///         USERS TABLE SCHEMA
@@ -98,17 +98,17 @@ QStringList pigeondatabase::messageGetHistory(const QString& table) {
     if(query.exec("SELECT * FROM " + table)) {
         while(query.next()) {
             msgHistory.push_back(query.value(0).toString() + " - " + query.value(1).toString());
-            qDebug() << "MSGGETHISTORY" << query.value(0).toString() + " - " + query.value(1).toString();
         }
     } else {
         qDebug() << "Failed to execute a query";
     }
 
+    qDebug() << msgHistory;
 
     return msgHistory;
 }
 
-void pigeondatabase::createChatroom(const QString& table) {
+void pigeondatabase::chatroomCreate(const QString& table) {
     QSqlQuery query;
     if(query.exec("CREATE TABLE IF NOT EXISTS " + table +
                    " (username VARCHAR(255) NOT NULL," +
@@ -118,6 +118,7 @@ void pigeondatabase::createChatroom(const QString& table) {
     }
 }
 
+/*
 void pigeondatabase::messageAdd(const QString& username, const QString& message) {
     QSqlQuery query;
     // i'll need to add a chatroomName parameter later
@@ -126,6 +127,31 @@ void pigeondatabase::messageAdd(const QString& username, const QString& message)
     } else {
         qDebug() << "Failed to execute a query";
     }
+}
+*/
+
+void pigeondatabase::messageAdd(const QString& table, const QString& username, const QString& message) {
+    QSqlQuery query;
+    // i'll need to add a chatroomName parameter later
+    if(query.exec("INSERT INTO " + table + " (username, message) VALUES ('" + username + "','" + message + "')")) {
+        messageGetHistory(table);
+    } else {
+        qDebug() << "messageAdd: Failed to execute a query";
+    }
+}
+
+bool pigeondatabase::chatroomExists(const QString& chatroomName) {
+    QSqlQuery query;
+    if(query.exec("SELECT table_name FROM information_schema.tables")) {
+        while(query.next()) {
+            if(query.value(0).toString() == chatroomName) {
+                return true;
+            }
+        }
+    } else {
+        qDebug() << "Failed to execute a query";
+    }
+    return false;
 }
 
 

@@ -29,6 +29,7 @@ private slots:
 private:
     Ui::pigeonclient_main *ui;
     QString m_username;
+    QString m_receiver;
     QTcpSocket* m_socket = nullptr;
 };
 

@@ -14,13 +14,14 @@ pigeonclient_main::pigeonclient_main(QTcpSocket* socket)
     ui->setupUi(this);
     this->setFixedSize(this->size());
     ui->teMessageBox->setReadOnly(true);
+    ui->teMessageBox->append("Try to find someone in the left corner!1");
 
     m_socket->connectToHost(hostconstants::HOST_IP, hostconstants::HOST_PORT);
     disconnect(m_socket, nullptr, nullptr, nullptr);
-    connect(ui->pbSend, &QPushButton::clicked, this, &pigeonclient_main::sendMessage);
-    connect(ui->leSearch, &QLineEdit::textChanged, this, [&](){
 
-        //lock search and clear it
+    connect(ui->pbSend, &QPushButton::clicked, this, &pigeonclient_main::sendMessage);
+
+    connect(ui->leSearch, &QLineEdit::textChanged, this, [&](){
         ui->lwSearchResults->clear();
         if(ui->leSearch->text().isEmpty()) return;
 
@@ -28,7 +29,6 @@ pigeonclient_main::pigeonclient_main(QTcpSocket* socket)
 
 
         QString search {ui->leSearch->text()};
-        //send request to server
 
         QByteArray bytearr;
         QDataStream in(&bytearr, QIODevice::WriteOnly);
@@ -41,14 +41,31 @@ pigeonclient_main::pigeonclient_main(QTcpSocket* socket)
         if(byteswritten < 0) QMessageBox::critical(this, "Pigeon", m_socket->errorString());
         m_socket->waitForBytesWritten();
         m_socket->waitForReadyRead();
-        //also probably have to wait for ReadyRead?
 
-        //unlock search
         ui->leSearch->setReadOnly(false);
 
-    }); //whenever text changing, post results to lwSearchResults
+    });
+    connect(ui->lwSearchResults, &QListWidget::itemDoubleClicked, this, [&](QListWidgetItem* item){
+    //ask for a message history between sender and receiver
+        QString receiver {item->text()};
+        m_receiver = receiver;
+        qDebug() << "itemSelect:" << m_receiver;
+
+        QByteArray bytearr;
+        QDataStream in(&bytearr, QIODevice::WriteOnly);
+
+        in << GET_PRIVATE_MESSAGE_HISTORY << m_username << receiver;
+
+        quint16 byteswritten = m_socket->write(bytearr);
+        if(byteswritten < 0) {
+            QMessageBox::critical(this, "Pigeon", m_socket->errorString());
+            return;
+        }
+        m_socket->waitForBytesWritten();
+        m_socket->waitForReadyRead();
+    });
     connect(m_socket, &QTcpSocket::readyRead, this, &pigeonclient_main::readFromServer);
-    connect(m_socket, &QTcpSocket::disconnected, this, &QObject::deleteLater); /// when disconnected send&get a request from a server to delete a client
+    connect(m_socket, &QTcpSocket::disconnected, this, &QObject::deleteLater);
 
     qDebug() << "_main socket" << m_socket;
 }
@@ -82,7 +99,8 @@ void pigeonclient_main::sendMessage() {
     QByteArray bytearr;
     QDataStream datastream(&bytearr, QIODevice::WriteOnly);
 
-    datastream << SEND_MESSAGE << m_username << ui->leMessage->text();
+    datastream << SEND_PRIVATE_MESSAGE << m_username << m_receiver << ui->leMessage->text();
+    qDebug() << "sendMessage:" << m_username << m_receiver << ui->leMessage->text();
 
     quint16 byteswritten = m_socket->write(bytearr);
     if(byteswritten < 0) {
@@ -105,7 +123,7 @@ void pigeonclient_main::readFromServer() {
     {
         QString username;
         QStringList msgHistory;
-        out >> username >> msgHistory;        
+        out >> username >> msgHistory;
         for(auto& msg : msgHistory) ui->teMessageBox->append(msg);
 
     } break;
@@ -129,7 +147,21 @@ void pigeonclient_main::readFromServer() {
         out >> usersFound;
         for(auto& user : usersFound) ui->lwSearchResults->addItem(user);
     } break;
-
+    case GET_PRIVATE_MESSAGE_HISTORY:
+    {
+        QStringList msgHistory;
+        out >> msgHistory;
+        qDebug() << msgHistory;
+        ui->teMessageBox->clear();
+        for(auto& msg : msgHistory) ui->teMessageBox->append(msg);
+    } break;
+    case SEND_PRIVATE_MESSAGE:
+    {
+        QString username;
+        QString message;
+        out >> username >> message;
+        ui->teMessageBox->append(username + " - " + message);
+    } break;
     default:
     break;
     }
