@@ -1,5 +1,5 @@
-#ifndef PIGEONCLIENT_MAIN_H
-#define PIGEONCLIENT_MAIN_H
+#ifndef PIGEONCLIENTMAINWINDOW_H
+#define PIGEONCLIENTMAINWINDOW_H
 
 #include <QMainWindow>
 #include <QtNetwork>
@@ -9,14 +9,14 @@ namespace Ui {
 class pigeonclient_main;
 }
 
-class pigeonclient_main : public QMainWindow
+class PigeonClientMainWindow : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    explicit pigeonclient_main(QWidget *parent = nullptr);
-    explicit pigeonclient_main(QTcpSocket* socket = nullptr);
-    ~pigeonclient_main();
+    explicit PigeonClientMainWindow(QWidget *parent = nullptr);
+    explicit PigeonClientMainWindow(QTcpSocket* socket = nullptr);
+    ~PigeonClientMainWindow();
     void setUsername(const QString&);
 
 public slots:
@@ -33,4 +33,4 @@ private:
     QTcpSocket* m_socket = nullptr;
 };
 
-#endif // PIGEONCLIENT_MAIN_H
+#endif // PIGEONCLIENTMAINWINDOW_H

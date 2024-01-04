@@ -14,16 +14,16 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Gui Network Widgets 
 
 set(PROJECT_SOURCES
         main.cpp
-        pigeonclient_login.cpp
-        pigeonclient_login.h
-        pigeonclient_login.ui
+        pigeonclientloginwindow.cpp
+        pigeonclientloginwindow.h
+        pigeonclientloginwindow.ui
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(pigeonclient
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
-        pigeonclient_main.h pigeonclient_main.cpp pigeonclient_main.ui
+        pigeonclientmainwindow.h pigeonclientmainwindow.cpp pigeonclientmainwindow.ui
         requesttype.h
         hostconstants.h
 

@@ -1,6 +1,6 @@
 #include "pigeondatabase.h"
 
-pigeondatabase::pigeondatabase(QObject *parent)
+PigeonDatabase::PigeonDatabase(QObject *parent)
     : QObject{parent}, database{QSqlDatabase::addDatabase("QPSQL")}
 {
     database.setHostName("localhost");
@@ -17,7 +17,7 @@ pigeondatabase::pigeondatabase(QObject *parent)
     messageGetHistory("rootanthesis_msghistory");
 }
 
-pigeondatabase::~pigeondatabase()
+PigeonDatabase::~PigeonDatabase()
 {
 }
 
@@ -26,7 +26,7 @@ pigeondatabase::~pigeondatabase()
 ///|  ID  |   USERNAME   |  PASSWORD   |
 ///|------|--------------|-------------|
 
-void pigeondatabase::userPrintEveryone() {
+void PigeonDatabase::userPrintEveryone() {
     QSqlQuery query;
     if(query.exec("SELECT * FROM users")) {
         while(query.next()) {
@@ -39,7 +39,7 @@ void pigeondatabase::userPrintEveryone() {
     }
 }
 
-QStringList pigeondatabase::userPrint(const QString& username) {
+QStringList PigeonDatabase::userPrint(const QString& username) {
     QSqlQuery query;
     QStringList usersFound;
     if(query.exec("SELECT username FROM users WHERE username LIKE '%" + username + "%'")) {
@@ -53,7 +53,7 @@ QStringList pigeondatabase::userPrint(const QString& username) {
     return usersFound;
 }
 
-bool pigeondatabase::userExists(const QString& username, const QString& password) {
+bool PigeonDatabase::userExists(const QString& username, const QString& password) {
     QSqlQuery query;
     if(query.exec("SELECT * FROM users")) {
         while(query.next()) {
@@ -68,7 +68,7 @@ bool pigeondatabase::userExists(const QString& username, const QString& password
     return false;
 }
 
-bool pigeondatabase::userExists(const QString& username) {
+bool PigeonDatabase::userExists(const QString& username) {
     QSqlQuery query;
     if(query.exec("SELECT username FROM users")) {
         while(query.next()) {
@@ -83,7 +83,7 @@ bool pigeondatabase::userExists(const QString& username) {
     return false;
 }
 
-void pigeondatabase::userAdd(const QString& username, const QString& password) {
+void PigeonDatabase::userAdd(const QString& username, const QString& password) {
     QSqlQuery query;
     if(query.exec("INSERT INTO users (username, password) VALUES ('" + username + "','" + password + "')")) {
         userPrintEveryone();
@@ -92,7 +92,7 @@ void pigeondatabase::userAdd(const QString& username, const QString& password) {
     }
 }
 
-QStringList pigeondatabase::messageGetHistory(const QString& table) {
+QStringList PigeonDatabase::messageGetHistory(const QString& table) {
     QSqlQuery query;
     QStringList msgHistory;
     if(query.exec("SELECT * FROM " + table)) {
@@ -108,7 +108,7 @@ QStringList pigeondatabase::messageGetHistory(const QString& table) {
     return msgHistory;
 }
 
-void pigeondatabase::chatroomCreate(const QString& table) {
+void PigeonDatabase::chatroomCreate(const QString& table) {
     QSqlQuery query;
     if(query.exec("CREATE TABLE IF NOT EXISTS " + table +
                    " (username VARCHAR(255) NOT NULL," +
@@ -119,7 +119,7 @@ void pigeondatabase::chatroomCreate(const QString& table) {
 }
 
 /*
-void pigeondatabase::messageAdd(const QString& username, const QString& message) {
+void PigeonDatabase::messageAdd(const QString& username, const QString& message) {
     QSqlQuery query;
     // i'll need to add a chatroomName parameter later
     if(query.exec("INSERT INTO global (username, message) VALUES ('" + username + "','" + message + "')")) {
@@ -130,7 +130,7 @@ void pigeondatabase::messageAdd(const QString& username, const QString& message)
 }
 */
 
-void pigeondatabase::messageAdd(const QString& table, const QString& username, const QString& message) {
+void PigeonDatabase::messageAdd(const QString& table, const QString& username, const QString& message) {
     QSqlQuery query;
     // i'll need to add a chatroomName parameter later
     if(query.exec("INSERT INTO " + table + " (username, message) VALUES ('" + username + "','" + message + "')")) {
@@ -140,7 +140,7 @@ void pigeondatabase::messageAdd(const QString& table, const QString& username, c
     }
 }
 
-bool pigeondatabase::chatroomExists(const QString& chatroomName) {
+bool PigeonDatabase::chatroomExists(const QString& chatroomName) {
     QSqlQuery query;
     if(query.exec("SELECT table_name FROM information_schema.tables")) {
         while(query.next()) {

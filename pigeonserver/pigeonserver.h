@@ -14,13 +14,13 @@ class pigeonserver;
 }
 QT_END_NAMESPACE
 
-class pigeonserver : public QMainWindow
+class PigeonServer : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    pigeonserver(QWidget *parent = nullptr);
-    ~pigeonserver();
+    PigeonServer(QWidget *parent = nullptr);
+    ~PigeonServer();
 
 public slots:
     void newClient();
@@ -30,7 +30,7 @@ public slots:
 private:
     Ui::pigeonserver *ui;
     QTcpServer* m_server = nullptr;
-    pigeondatabase database;
+    PigeonDatabase database;
 
     QMap<QString, QTcpSocket*> m_clients; //username and according socket;
 };

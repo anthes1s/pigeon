@@ -1,11 +1,11 @@
-#include "pigeonclient_login.h"
+#include "pigeonclientloginwindow.h"
 
 #include <QApplication>
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    pigeonclient w;
+    PigeonClientLoginWindow w;
     w.show();
     return a.exec();
 }

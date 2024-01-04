@@ -4,7 +4,7 @@
 #include "hostconstants.h"
 #include "requesttype.h"
 
-pigeonserver::pigeonserver(QWidget *parent)
+PigeonServer::PigeonServer(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::pigeonserver), m_server(new QTcpServer(this))
 {
     ui->setupUi(this);
@@ -21,26 +21,26 @@ pigeonserver::pigeonserver(QWidget *parent)
         }
     }
 
-    if(!m_server->listen(QHostAddress::Any, hostconstants::HOST_PORT)) {
+    if(!m_server->listen(QHostAddress::Any, HostConstants::HOST_PORT)) {
         QMessageBox::critical(this, "Pigeon Server", m_server->errorString());
         close();
     } else {
         ui->teMessageBox->append("Server is listening at: " + ipAddress + ' ' + "Port: " + QString::number(m_server->serverPort()));
     }
 
-    connect(m_server, &QTcpServer::newConnection, this, &pigeonserver::newClient); /// when new tcpsocket is connected, add it to the qlist
+    connect(m_server, &QTcpServer::newConnection, this, &PigeonServer::newClient); /// when new tcpsocket is connected, add it to the qlist
 }
 
-pigeonserver::~pigeonserver()
+PigeonServer::~PigeonServer()
 {
     delete m_server;
     delete ui;
 }
 
-void pigeonserver::newClient() {
+void PigeonServer::newClient() {
     QTcpSocket* client_connection = m_server->nextPendingConnection();
 
-    connect(client_connection, &QTcpSocket::readyRead, this, &pigeonserver::readFromClient);
+    connect(client_connection, &QTcpSocket::readyRead, this, &PigeonServer::readFromClient);
 
     connect(client_connection, &QTcpSocket::disconnected, this, [=](){
         //remove client from m_clients upon disconnection
@@ -50,7 +50,7 @@ void pigeonserver::newClient() {
     });
 }
 
-void pigeonserver::readFromClient() {
+void PigeonServer::readFromClient() {
     QTcpSocket* sender_socket = qobject_cast<QTcpSocket*>(sender());
 
     QByteArray bytearr = sender_socket->readAll();
@@ -72,11 +72,9 @@ void pigeonserver::readFromClient() {
             QByteArray tmparr;
             QDataStream in(&tmparr, QIODevice::WriteOnly);
 
-            RequestType req_t;
-
             in << USER_LOGIN_SUCCESS;
 
-            quint16 byteswritten = sender_socket->write(tmparr);
+            qint16 byteswritten = sender_socket->write(tmparr);
             if(byteswritten < 0) {
                 QMessageBox::critical(this, "Pigeon", sender_socket->errorString());
                 return;
@@ -88,11 +86,9 @@ void pigeonserver::readFromClient() {
             QByteArray tmparr;
             QDataStream in(&tmparr, QIODevice::WriteOnly);
 
-            RequestType req_t;
-
             in << USER_LOGIN_FAIL;
 
-            quint16 byteswritten = sender_socket->write(tmparr);
+            qint16 byteswritten = sender_socket->write(tmparr);
             if(byteswritten < 0) {
                 QMessageBox::critical(this, "Pigeon", sender_socket->errorString());
                 return;
@@ -127,23 +123,24 @@ void pigeonserver::readFromClient() {
 
         //send this back to receiver and sender
         {
-            QByteArray bytearr;
-            QDataStream in(&bytearr, QIODevice::WriteOnly);
+            QByteArray tmparr;
+            QDataStream in(&tmparr, QIODevice::WriteOnly);
             in << SEND_PRIVATE_MESSAGE << username << message;
 
-            quint16 byteswritten = sender_socket->write(bytearr);
+            qint16 byteswritten = sender_socket->write(tmparr);
             if(byteswritten < 0) {
                 QMessageBox::critical(this, "Pigeon", sender_socket->errorString());
                 return;
             }
             sender_socket->waitForBytesWritten();
-
+        }
+        {
             if(isOnline(receiver)) {
-                QByteArray bytearr;
-                QDataStream in(&bytearr, QIODevice::WriteOnly);
+                QByteArray tmparr;
+                QDataStream in(&tmparr, QIODevice::WriteOnly);
                 in << SEND_PRIVATE_MESSAGE << username << message;
 
-                quint16 byteswritten = m_clients[receiver]->write(bytearr);
+                qint16 byteswritten = m_clients[receiver]->write(tmparr);
                 if(byteswritten < 0) {
                     QMessageBox::critical(this, "Pigeon", m_clients[receiver]->errorString());
                     return;
@@ -170,7 +167,7 @@ void pigeonserver::readFromClient() {
 
             in << USER_REGISTRATION_FAIL;
 
-            quint16 byteswritten = sender_socket->write(reqarr);
+            qint16 byteswritten = sender_socket->write(reqarr);
             if(byteswritten < 0) {
                 QMessageBox::critical(this, "Pigeon Server", sender_socket->errorString());
                 return;
@@ -185,7 +182,7 @@ void pigeonserver::readFromClient() {
 
             in << USER_REGISTRATION_SUCCESS;
 
-            quint16 byteswritten = sender_socket->write(reqarr);
+            qint16 byteswritten = sender_socket->write(reqarr);
             if(byteswritten < 0) {
                 QMessageBox::critical(this, "Pigeon Server", sender_socket->errorString());
                 return;
@@ -208,7 +205,7 @@ void pigeonserver::readFromClient() {
 
             in << USER_SEARCH << usersFound;
 
-            quint16 byteswritten = sender_socket->write(tmparr);
+            qint16 byteswritten = sender_socket->write(tmparr);
             if(byteswritten < 0) {
                 QMessageBox::critical(this, "Pigeon Server", sender_socket->errorString());
                 return;
@@ -243,7 +240,7 @@ void pigeonserver::readFromClient() {
             in << GET_PRIVATE_MESSAGE_HISTORY << msgHistory;
             qDebug() << sender + receiver << msgHistory;
 
-            quint16 byteswritten = sender_socket->write(tmparr);
+            qint16 byteswritten = sender_socket->write(tmparr);
             if(byteswritten < 0) {
                 QMessageBox::critical(this, "Pigeon Server", sender_socket->errorString());
                 return;
@@ -256,7 +253,7 @@ void pigeonserver::readFromClient() {
     }
 }
 
-bool pigeonserver::isOnline(const QString& username) {
+bool PigeonServer::isOnline(const QString& username) {
     if(m_clients.find(username) != m_clients.end()) {
         return true;
     } else {

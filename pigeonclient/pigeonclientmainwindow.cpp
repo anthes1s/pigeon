@@ -1,14 +1,14 @@
-#include "pigeonclient_main.h"
-#include "ui_pigeonclient_main.h"
+#include "pigeonclientmainwindow.h"
+#include "ui_pigeonclientmainwindow.h"
 
 #include "hostconstants.h"
 #include "requesttype.h"
 
-pigeonclient_main::pigeonclient_main(QWidget *parent) : QMainWindow(parent), ui(new Ui::pigeonclient_main)
+PigeonClientMainWindow::PigeonClientMainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::pigeonclient_main)
 {
 }
 
-pigeonclient_main::pigeonclient_main(QTcpSocket* socket)
+PigeonClientMainWindow::PigeonClientMainWindow(QTcpSocket* socket)
     : ui(new Ui::pigeonclient_main), m_socket(qMove(socket))
 {
     ui->setupUi(this);
@@ -19,7 +19,7 @@ pigeonclient_main::pigeonclient_main(QTcpSocket* socket)
     m_socket->connectToHost(hostconstants::HOST_IP, hostconstants::HOST_PORT);
     disconnect(m_socket, nullptr, nullptr, nullptr);
 
-    connect(ui->pbSend, &QPushButton::clicked, this, &pigeonclient_main::sendMessage);
+    connect(ui->pbSend, &QPushButton::clicked, this, &PigeonClientMainWindow::sendMessage);
 
     connect(ui->leSearch, &QLineEdit::textChanged, this, [&](){
         ui->lwSearchResults->clear();
@@ -64,24 +64,24 @@ pigeonclient_main::pigeonclient_main(QTcpSocket* socket)
         m_socket->waitForBytesWritten();
         m_socket->waitForReadyRead();
     });
-    connect(m_socket, &QTcpSocket::readyRead, this, &pigeonclient_main::readFromServer);
+    connect(m_socket, &QTcpSocket::readyRead, this, &PigeonClientMainWindow::readFromServer);
     connect(m_socket, &QTcpSocket::disconnected, this, &QObject::deleteLater);
 
     qDebug() << "_main socket" << m_socket;
 }
 
-pigeonclient_main::~pigeonclient_main()
+PigeonClientMainWindow::~PigeonClientMainWindow()
 {
     m_socket->abort();
     delete m_socket;
     delete ui;
 }
 
-void pigeonclient_main::setUsername(const QString& username) {
+void PigeonClientMainWindow::setUsername(const QString& username) {
     m_username = username;
 }
 
-void pigeonclient_main::sendConnected() {
+void PigeonClientMainWindow::sendConnected() {
     QByteArray bytearr;
     QDataStream datastream(&bytearr, QIODevice::ReadWrite);
 
@@ -95,7 +95,7 @@ void pigeonclient_main::sendConnected() {
     m_socket->waitForBytesWritten();
 }
 
-void pigeonclient_main::sendMessage() {
+void PigeonClientMainWindow::sendMessage() {
     QByteArray bytearr;
     QDataStream datastream(&bytearr, QIODevice::WriteOnly);
 
@@ -111,7 +111,7 @@ void pigeonclient_main::sendMessage() {
     ui->leMessage->clear();
 }
 
-void pigeonclient_main::readFromServer() {
+void PigeonClientMainWindow::readFromServer() {
     QByteArray bytearr = m_socket->readAll();
     QDataStream out (&bytearr, QIODevice::ReadOnly);
 

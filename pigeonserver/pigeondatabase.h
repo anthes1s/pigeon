@@ -6,12 +6,12 @@
 #include <QSqlQuery>
 #include <QDebug>
 
-class pigeondatabase : public QObject
+class PigeonDatabase : public QObject
 {
     Q_OBJECT
 public:
-    explicit pigeondatabase(QObject *parent = nullptr);
-    ~pigeondatabase();
+    explicit PigeonDatabase(QObject *parent = nullptr);
+    ~PigeonDatabase();
 signals:
 
 public slots:

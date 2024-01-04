@@ -1,10 +1,10 @@
-#ifndef PIGEONCLIENT_LOGIN_H
-#define PIGEONCLIENT_LOGIN_H
+#ifndef PIGEONCLIENTLOGINWINDOW_H
+#define PIGEONCLIENTLOGINWINDOW_H
 
 #include <QMainWindow>
 #include <QMessageBox>
 
-#include "pigeonclient_main.h"
+#include "pigeonclientmainwindow.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -12,13 +12,13 @@ class pigeonclient;
 }
 QT_END_NAMESPACE
 
-class pigeonclient : public QMainWindow
+class PigeonClientLoginWindow : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    pigeonclient(QWidget *parent = nullptr);
-    ~pigeonclient();
+    PigeonClientLoginWindow(QWidget *parent = nullptr);
+    ~PigeonClientLoginWindow();
 
 private slots:
     void signIn();
@@ -28,7 +28,7 @@ private slots:
 
 private:
     Ui::pigeonclient *ui;
-    pigeonclient_main* m_main = nullptr;
+    PigeonClientMainWindow* m_main = nullptr;
     QString m_username;
 };
-#endif // PIGEONCLIENT_LOGIN_H
+#endif // PIGEONCLIENTLOGINWINDOW_H
