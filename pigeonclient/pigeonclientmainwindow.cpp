@@ -16,7 +16,7 @@ PigeonClientMainWindow::PigeonClientMainWindow(QTcpSocket* socket)
     ui->teMessageBox->setReadOnly(true);
     ui->teMessageBox->append("Try to find someone in the left corner!1");
 
-    m_socket->connectToHost(hostconstants::HOST_IP, hostconstants::HOST_PORT);
+    m_socket->connectToHost(HostConstants::HOST_IP, HostConstants::HOST_PORT);
     disconnect(m_socket, nullptr, nullptr, nullptr);
 
     connect(ui->pbSend, &QPushButton::clicked, this, &PigeonClientMainWindow::sendMessage);
@@ -37,7 +37,7 @@ PigeonClientMainWindow::PigeonClientMainWindow(QTcpSocket* socket)
 
         qDebug() << search;
 
-        quint16 byteswritten = m_socket->write(bytearr);
+        qint16 byteswritten = m_socket->write(bytearr);
         if(byteswritten < 0) QMessageBox::critical(this, "Pigeon", m_socket->errorString());
         m_socket->waitForBytesWritten();
         m_socket->waitForReadyRead();
@@ -56,7 +56,7 @@ PigeonClientMainWindow::PigeonClientMainWindow(QTcpSocket* socket)
 
         in << GET_PRIVATE_MESSAGE_HISTORY << m_username << receiver;
 
-        quint16 byteswritten = m_socket->write(bytearr);
+        qint16 byteswritten = m_socket->write(bytearr);
         if(byteswritten < 0) {
             QMessageBox::critical(this, "Pigeon", m_socket->errorString());
             return;
@@ -87,7 +87,7 @@ void PigeonClientMainWindow::sendConnected() {
 
     datastream << USER_CONNECTED << m_username;
 
-    quint16 byteswritten = m_socket->write(bytearr);
+    qint16 byteswritten = m_socket->write(bytearr);
     if(byteswritten < 0) {
         QMessageBox::critical(this, "Pigeon", m_socket->errorString());
     }
@@ -102,7 +102,7 @@ void PigeonClientMainWindow::sendMessage() {
     datastream << SEND_PRIVATE_MESSAGE << m_username << m_receiver << ui->leMessage->text();
     qDebug() << "sendMessage:" << m_username << m_receiver << ui->leMessage->text();
 
-    quint16 byteswritten = m_socket->write(bytearr);
+    qint16 byteswritten = m_socket->write(bytearr);
     if(byteswritten < 0) {
         QMessageBox::critical(this, "Pigeon", m_socket->errorString());
     }

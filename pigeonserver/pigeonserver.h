@@ -2,6 +2,7 @@
 #define PIGEONSERVER_H
 
 #include "pigeondatabase.h"
+#include "requesthandler.h"
 
 #include <QMainWindow>
 #include <QMessageBox>
@@ -30,8 +31,8 @@ public slots:
 private:
     Ui::pigeonserver *ui;
     QTcpServer* m_server = nullptr;
-    PigeonDatabase database;
-
+    PigeonDatabase m_database;
+    RequestHandler m_req_handler;
     QMap<QString, QTcpSocket*> m_clients; //username and according socket;
 };
 #endif // PIGEONSERVER_H

@@ -29,14 +29,14 @@ void PigeonClientLoginWindow::signIn() {
         
         connect(tmp_socket, &QTcpSocket::readyRead, this, &PigeonClientLoginWindow::loginSuccessful);
 
-        tmp_socket->connectToHost(hostconstants::HOST_IP, hostconstants::HOST_PORT);
+        tmp_socket->connectToHost(HostConstants::HOST_IP, HostConstants::HOST_PORT);
 
         QByteArray bytearr;
         QDataStream in(&bytearr, QIODevice::WriteOnly);
 
         in << USER_LOGIN << username << password;
 
-        quint16 byteswritten = tmp_socket->write(bytearr);
+        qint16 byteswritten = tmp_socket->write(bytearr);
         if(byteswritten < 0) {
             QMessageBox::critical(this, "Pigeon", tmp_socket->errorString());
             return;
@@ -62,14 +62,14 @@ void PigeonClientLoginWindow::signUp() {
     
     connect(tmp_socket, &QTcpSocket::readyRead, this, &PigeonClientLoginWindow::registrationSuccessful);
 
-    tmp_socket->connectToHost(hostconstants::HOST_IP, hostconstants::HOST_PORT);
+    tmp_socket->connectToHost(HostConstants::HOST_IP, HostConstants::HOST_PORT);
 
     QByteArray bytearr;
     QDataStream datastream(&bytearr, QIODevice::ReadWrite);
 
     datastream << USER_REGISTRATION << username << password;
 
-    quint16 byteswritten = tmp_socket->write(bytearr);
+    qint16 byteswritten = tmp_socket->write(bytearr);
     if(byteswritten < 0) {
         QMessageBox::critical(this, "Pigeon", tmp_socket->errorString());
         return;

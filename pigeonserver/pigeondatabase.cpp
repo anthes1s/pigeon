@@ -13,8 +13,13 @@ PigeonDatabase::PigeonDatabase(QObject *parent)
         qDebug() << "Database connected!";
     } else qDebug() << "Database not connected!";
 
+    QSqlQuery query;
+    if(query.exec("CREATE TABLE IF NOT EXISTS users (id BIGSERIAL NOT NULL, username VARCHAR(255) NOT NULL, password VARCHAR(512) NOT NULL)")) {
+    } else {
+        qDebug() << "Failed to execute a query";
+    }
+
     userPrintEveryone();
-    messageGetHistory("rootanthesis_msghistory");
 }
 
 PigeonDatabase::~PigeonDatabase()
@@ -49,7 +54,6 @@ QStringList PigeonDatabase::userPrint(const QString& username) {
     } else {
         qDebug() << "Failed to execute a query";
     }
-    qDebug() << usersFound;
     return usersFound;
 }
 

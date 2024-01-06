@@ -67,7 +67,7 @@ void PigeonServer::readFromClient() {
         out >> username >> password;
 
         //if user exists in database and is not online
-        if(database.userExists(username, password) && m_clients.find(username) == m_clients.end()) {
+        if(m_database.userExists(username, password) && !isOnline(username)) {
             //send USER_LOGIN_SUCCESS back
             QByteArray tmparr;
             QDataStream in(&tmparr, QIODevice::WriteOnly);
@@ -111,14 +111,13 @@ void PigeonServer::readFromClient() {
         QString message;
 
         out >> username >> receiver >> message;
-        qDebug() << "received: " << username << receiver << message;
 
         ui->teMessageBox->append(username + " sent " + message + " to " + receiver);
         //also add it to the database
-        if(database.chatroomExists(username + receiver + "_msghistory")) {
-            database.messageAdd(username + receiver + "_msghistory", username, message);
+        if(m_database.chatroomExists(username + receiver + "_msghistory")) {
+            m_database.messageAdd(username + receiver + "_msghistory", username, message);
         } else {
-            database.messageAdd(receiver + username + "_msghistory", username, message);
+            m_database.messageAdd(receiver + username + "_msghistory", username, message);
         }
 
         //send this back to receiver and sender
@@ -158,7 +157,7 @@ void PigeonServer::readFromClient() {
 
         out >> username >> password;
 
-        if(database.userExists(username)) {
+        if(m_database.userExists(username)) {
 
             ui->teMessageBox->append(username + " failed registration: USER ALREADY EXISTS");
 
@@ -175,7 +174,7 @@ void PigeonServer::readFromClient() {
             sender_socket->waitForBytesWritten();
         } else {
             ui->teMessageBox->append(username + " successfuly finished registration!");
-            database.userAdd(username, password);
+            m_database.userAdd(username, password);
 
             QByteArray reqarr;
             QDataStream in(&reqarr, QIODevice::WriteOnly);
@@ -195,10 +194,9 @@ void PigeonServer::readFromClient() {
     {
         QString search;
         out >> search;
-        qDebug() << search;
 
         {
-            QStringList usersFound {database.userPrint(search)};
+            QStringList usersFound {m_database.userPrint(search)};
 
             QByteArray tmparr;
             QDataStream in(&tmparr, QIODevice::WriteOnly);
@@ -221,16 +219,15 @@ void PigeonServer::readFromClient() {
 
         out >> sender >> receiver;
         //check if receiver+sender chatroom already exists and if so, send it
-        qDebug() << sender << receiver;
 
         QStringList msgHistory;
 
-        if(database.chatroomExists(sender + receiver + "_msghistory")) {
-            msgHistory = database.messageGetHistory(sender + receiver + "_msgHistory");
-        } else if(database.chatroomExists(receiver + sender + "_msghistory")) {
-            msgHistory = database.messageGetHistory(receiver + sender + "_msgHistory");
+        if(m_database.chatroomExists(sender + receiver + "_msghistory")) {
+            msgHistory = m_database.messageGetHistory(sender + receiver + "_msgHistory");
+        } else if(m_database.chatroomExists(receiver + sender + "_msghistory")) {
+            msgHistory = m_database.messageGetHistory(receiver + sender + "_msgHistory");
         } else {
-            database.chatroomCreate(sender + receiver + "_msghistory");
+            m_database.chatroomCreate(sender + receiver + "_msghistory");
         }
 
         {
@@ -238,7 +235,6 @@ void PigeonServer::readFromClient() {
             QDataStream in(&tmparr, QIODevice::WriteOnly);
 
             in << GET_PRIVATE_MESSAGE_HISTORY << msgHistory;
-            qDebug() << sender + receiver << msgHistory;
 
             qint16 byteswritten = sender_socket->write(tmparr);
             if(byteswritten < 0) {
@@ -247,7 +243,7 @@ void PigeonServer::readFromClient() {
             }
             sender_socket->waitForBytesWritten();
         }
-    }
+    } break;
     default:
     break;
     }
